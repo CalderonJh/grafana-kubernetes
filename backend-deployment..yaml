@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-backend
+  namespace: shoppingcart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-backend
+  template:
+    metadata:
+      labels:
+        app: cart-backend
+    spec:
+      containers:
+        - name: cart-backend
+          image: calderonjh/shopping-cart:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              value: "securepassword"
+            - name: RABBITMQ_HOST
+              value: "rabbitmq-service"
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USERNAME
+              value: "guest"
+            - name: RABBITMQ_PASSWORD
+              value: "guest"
+            - name: CATALOG_URL
+              value: "http://catalog-service:8081"
