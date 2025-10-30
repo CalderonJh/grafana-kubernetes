@@ -44,3 +44,7 @@ data:
       - job_name: 'prometheus'
         static_configs:
           - targets: ['localhost:9090']
+      - job_name: 'cart-backend'
+        metrics_path: /shopping-cart/actuator/prometheus
+        static_configs:
+          - targets: ['cart-backend-service.shoppingcart.svc.cluster.local:8080']
