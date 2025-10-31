@@ -3,7 +3,16 @@
 Siga las instrucciones desde la carpeta raíz al clonar este repositorio.
 
 ## Creación de los servicios a monitorear
+Primero se debe configurar MetalLB con el comando
+```bash
+microk8s enable metallb
+```
+Luego requiere un rango de red que debe ser especificado según la ip donde corre microk8s
+Ejemplo:
+Si la máquina tiene IP 192.168.1.50, se puede definir: `192.168.1.200-192.168.1.250`
 Primero crear el namespace
+
+Ahora se pasa a la creación del namespace y los servicios:
 ```bash
 microk8s kubectl apply -f namespace.yaml
 ```
@@ -61,7 +70,7 @@ De esto se puede tomar el nombre del pod creado para el backend, por ejemplo `ca
 microk8s kubectl logs cart-backend-7d97ddf5fc-7x2zz -n shoppingcart
 ```
 
-Verificar además usando `kubectl port-forward`, lo que crea un túnel temporal desde la máquina local hacia el pod o service dentro del clúster.
+Verificar además usando `port-forward`, lo que crea un túnel temporal desde la máquina local hacia el pod o service dentro del clúster.
 ```bash
 microk8s kubectl port-forward svc/cart-backend-service 8080:8080 -n shoppingcart --address 0.0.0.0
 ```
@@ -87,3 +96,21 @@ microk8s kubectl port-forward svc/prometheus -n monitoring 9090:9090 --address 0
 Luego abrir el navegador en http://<IP>:9090 y debería encontrar la UI de Prometheus. Verificar en el menu Status > Targets el estado del servicio backend.
 
 ## Creación del servicio de Grafana para visualización de las métricas
+Crear el servicio de Grafana
+```bash
+microk8s kubectl apply -f grafana-deployment.yaml
+```
+```bash
+microk8s kubectl apply -f grafana-service.yaml
+```
+Verificar con el comando
+```bash
+microk8s kubectl get svc -n monitoring
+```
+lo que debe mostrar algo como
+```
+NAME         TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)          AGE
+grafana      LoadBalancer   10.152.183.226   10.6.101.200   3000:31248/TCP   4h9m
+```
+De aquí se puede tomar la EXTERNAL-IP para acceder a la interfaz de Grafana desde el navegador.
+En el menú izquierdo, ir a Dashboards → New → Import. Se puede usar un dashboard preconfigurado, usando el ID 8919. Clic en Load, elige la fuente de datos (Prometheus), y Import.
