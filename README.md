@@ -92,7 +92,7 @@ Para este caso también se puede crear un túnel temporal para verificar la disp
 ```bash
 microk8s kubectl port-forward svc/prometheus -n monitoring 9090:9090 --address 0.0.0.0
 ```
-Luego abrir el navegador en http://<IP>:9090 y debería encontrar la UI de Prometheus. Verificar en el menu Status > Targets el estado del servicio backend.
+Luego abrir el navegador en http://ip-address:9090 y debería encontrar la UI de Prometheus. Verificar en el menu Status > Targets el estado del servicio backend.
 
 ## Creación del servicio de Grafana para visualización de las métricas
 Crear el servicio de Grafana
@@ -111,5 +111,5 @@ lo que debe mostrar algo como
 NAME         TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)          AGE
 grafana      LoadBalancer   10.152.183.226   10.6.101.200   3000:31248/TCP   4h9m
 ```
-De aquí se puede tomar la EXTERNAL-IP para acceder a la interfaz de Grafana desde el navegador.
+De aquí se puede tomar la EXTERNAL-IP para acceder a la interfaz de Grafana desde el navegador usando la URL http://ip-address:3000 con las credenciales admin/admin.
 En el menú izquierdo, ir a Dashboards → New → Import. Se puede usar un dashboard preconfigurado, usando el ID 8919. Clic en Load, elige la fuente de datos (Prometheus), y Import.
