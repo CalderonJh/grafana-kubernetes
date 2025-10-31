@@ -73,7 +73,7 @@ Verificar además usando `port-forward`, lo que crea un túnel temporal desde la
 ```bash
 microk8s kubectl port-forward svc/cart-backend-service 8080:8080 -n shoppingcart --address 0.0.0.0
 ```
-Luego abrir el navegador en http://<IP>:8080/shopping-cart/actuator/health y verificar `"status":"UP"` o consultar la documentación de la API en http://<IP>:8080/shopping-cart/swagger-ui/index.html
+Luego abrir el navegador en http://ip-address:8080/shopping-cart/actuator/health y verificar `"status":"UP"` o consultar la documentación de la API en http://ip-address:8080/shopping-cart/swagger-ui/index.html
 
 
 ## Creación del servicio de Prometheus para obtener métricas
