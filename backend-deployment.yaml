@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: cart-backend
-          image: calderonjh/shopping-cart:latest
+          image: calderonjh/shopping-cart:2.f
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

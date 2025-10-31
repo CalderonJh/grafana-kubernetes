@@ -1,7 +1,8 @@
-Implementación de monitoreo y alertas de una applicación web usando Prometheus y Grafana
+# Implementación de monitoreo y alertas de una aplicación web usando Prometheus y Grafana
 
-Siga las instrucciones desde la carpeta raiz al clonar este repositorio.
+Siga las instrucciones desde la carpeta raíz al clonar este repositorio.
 
+## Creación de los servicios a monitorear
 Primero crear el namespace
 ```bash
 microk8s kubectl apply -f namespace.yaml
@@ -34,16 +35,16 @@ microk8s kubectl get pods -n shoppingcart
 microk8s kubectl get svc -n shoppingcart
 ```
 
-Crear el servicio para el Back-end. El backend debe tener ya configurado el Actuator y Prometheus. Además de estar Dockerizado y con la imagen generada guardada en DockerHub. Para este caso se llama `calderonjh/shopping-cart:latest`, si cambia el nombre de la imagen se debe cambiar en esta parte del `backend-deployment.yaml`
+Crear el servicio para el Back-end. El backend debe tener ya configurado el Actuator y Prometheus. Además de estar Dockerizado y con la imagen generada guardada en DockerHub. El nombre de la imagen se debe especificar en esta parte del `backend-deployment.yaml`
 
 ```yaml
     spec:
       containers:
         - name: cart-backend
-          image: <<IMAGE_NAME>>
+          image: image:tag # <- here
 ```
 
-Despues se deben crear los servicios del backend en Kubernetes
+Después se deben crear los servicios del backend en Kubernetes
 ```bash
 microk8s kubectl apply -f backend-deployment.yaml
 ```
@@ -55,7 +56,7 @@ Verificar nuevamente con
 ```bash
 microk8s kubectl get pods -n shoppingcart
 ```
-De esto se peude tomar el nombre del pod creado para el backend, por ejemplo `cart-backend-7d97ddf5fc-7x2zz` y usar el comando para revisar que esté corriendo correctamente.
+De esto se puede tomar el nombre del pod creado para el backend, por ejemplo `cart-backend-7d97ddf5fc-7x2zz` y usar el comando para revisar que esté corriendo correctamente.
 ```bash
 microk8s kubectl logs cart-backend-7d97ddf5fc-7x2zz -n shoppingcart
 ```
@@ -67,6 +68,7 @@ microk8s kubectl port-forward svc/cart-backend-service 8080:8080 -n shoppingcart
 Luego abrir el navegador en http://<IP>:8080/shopping-cart/actuator/health y verificar `"status":"UP"` o consultar la documentación de la API en http://<IP>:8080/shopping-cart/swagger-ui/index.html
 
 
+## Creación del servicio de Prometheus para obtener métricas
 El siguiente paso es crear el servicio de Prometheus en Kubernetes
 
 ```bash
@@ -78,8 +80,10 @@ microk8s kubectl apply -f prometheus-deployment.yaml
 ```bash
 microk8s kubectl apply -f prometheus-service.yaml
 ```
-Para este caso tambien se puede crear un tunel tamporal para verificar la disponibilidad del servicio
+Para este caso también se puede crear un túnel temporal para verificar la disponibilidad del servicio
 ```bash
 microk8s kubectl port-forward svc/prometheus -n monitoring 9090:9090 --address 0.0.0.0
 ```
-Luego abrir el navegador en http://<IP>:9090 y debería encontrar la UI de Prometheus.
+Luego abrir el navegador en http://<IP>:9090 y debería encontrar la UI de Prometheus. Verificar en el menu Status > Targets el estado del servicio backend.
+
+## Creación del servicio de Grafana para visualización de las métricas
