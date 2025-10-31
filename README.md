@@ -10,7 +10,6 @@ microk8s enable metallb
 Luego requiere un rango de red que debe ser especificado según la ip donde corre microk8s
 Ejemplo:
 Si la máquina tiene IP 192.168.1.50, se puede definir: `192.168.1.200-192.168.1.250`
-Primero crear el namespace
 
 Ahora se pasa a la creación del namespace y los servicios:
 ```bash
