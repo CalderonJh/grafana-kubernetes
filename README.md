@@ -11,9 +11,9 @@ Luego requiere un rango de red que debe ser especificado según la ip donde corr
 Ejemplo:
 Si la máquina tiene IP 192.168.1.50, se puede definir: `192.168.1.200-192.168.1.250`
 
-Ahora se pasa a la creación del namespace y los servicios:
+Ahora se pasa a la creación del namespace para la app a monitorear:
 ```bash
-microk8s kubectl apply -f namespace.yaml
+microk8s kubectl create namespace shopppingcart
 ```
 
 Verificar que exista con
@@ -22,6 +22,7 @@ microk8s kubectl get namespaces
 ```
 
 Crear los servicios de RabbitMQ y Redis, esto se debe a que el servicio backend a monitorear usa estas herramientas.
+Ejecutar desde el directorio `backend`:
 ```bash
 microk8s kubectl apply -f redis-deployment.yaml
 ```
@@ -78,6 +79,7 @@ Luego abrir el navegador en http://ip-address:8080/shopping-cart/actuator/health
 
 ## Creación del servicio de Prometheus para obtener métricas
 El siguiente paso es crear el servicio de Prometheus en Kubernetes
+Ejecutar desde el directorio `prometheus`:
 
 ```bash
 microk8s kubectl create namespace monitoring
@@ -95,6 +97,7 @@ microk8s kubectl port-forward svc/prometheus -n monitoring 9090:9090 --address 0
 Luego abrir el navegador en http://ip-address:9090 y debería encontrar la UI de Prometheus. Verificar en el menu Status > Targets el estado del servicio backend.
 
 ## Creación del servicio de Grafana para visualización de las métricas
+Ejecutar desde el directorio `grafana`:
 Crear el servicio de Grafana
 ```bash
 microk8s kubectl apply -f grafana-deployment.yaml
@@ -113,3 +116,19 @@ grafana      LoadBalancer   10.152.183.226   10.6.101.200   3000:31248/TCP   4h9
 ```
 De aquí se puede tomar la EXTERNAL-IP para acceder a la interfaz de Grafana desde el navegador usando la URL http://ip-address:3000 con las credenciales admin/admin.
 En el menú izquierdo, ir a Dashboards → New → Import. Se puede usar un dashboard preconfigurado, usando el ID 8919. Clic en Load, elige la fuente de datos (Prometheus), y Import.
+
+## Creación de alertas:
+Para la creación de alertas, ejecute desde el directorio `alertmanager`:
+```bash
+microk8s kubectl apply -f alertmanager-config.yaml
+```
+```bash
+microk8s kubectl apply -f alertmanager-deployment.yaml
+```
+```bash
+microk8s kubectl apply -f alertmanager-service.yaml
+```
+```bash
+microk8s kubectl apply -f prometheus-rules.yaml
+```
+En la interfaz de prometheus debería ver en Status > Rules las condiciones dadas para la generación de alertas.

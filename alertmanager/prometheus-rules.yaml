@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: monitoring
+data:
+  shoppingcart-rules.yml: |
+    groups:
+    - name: shoppingcart-backend-alerts
+      rules:
+      
+      # High HTTP 500 Error Rate for Cart Backend
+      - alert: CartBackendHigh5xxErrors
+        expr: |
+          rate(
+            http_server_requests_seconds_count{
+              job="cart-backend",
+              status="500"
+            }[5m]
+          ) * 60 > 5  # More than 5 errors per minute
+        for: 2m
+        labels:
+          severity: critical
+          namespace: shoppingcart
+          service: cart-backend
+        annotations:
+          summary: "High rate of HTTP 500 errors in cart backend"
+          description: "Cart backend is experiencing {{ $value }} HTTP 500 errors per minute"
+          
+      # High 5xx Error Percentage
+      - alert: CartBackendHighErrorRate
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{job="cart-backend",status=~"5.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count{job="cart-backend"}[5m]))
+          ) * 100 > 3  # More than 3% error rate
+        for: 3m
+        labels:
+          severity: warning
+          namespace: shoppingcart
+          service: cart-backend
+        annotations:
+          summary: "High percentage of HTTP 5xx errors in cart backend"
+          description: "Cart backend error rate is {{ $value }}%"
+          
+      # Application Down
+      - alert: CartBackendDown
+        expr: up{job="cart-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          namespace: shoppingcart
+          service: cart-backend
+        annotations:
+          summary: "Cart backend is down"
+          description: "The shopping cart backend has been down for more than 1 minute"
+          
+      # High Response Time
+      - alert: CartBackendHighResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            rate(http_server_requests_seconds_bucket{job="cart-backend"}[5m])
+          ) > 2  # 95th percentile response time > 2 seconds
+        for: 5m
+        labels:
+          severity: warning
+          namespace: shoppingcart
+          service: cart-backend
+        annotations:
+          summary: "High response time in cart backend"
+          description: "95th percentile response time is {{ $value }} seconds"
+          
+      # JVM Memory Pressure
+      - alert: CartBackendHighMemoryUsage
+        expr: |
+          sum by (job) (jvm_memory_used_bytes{job="cart-backend", area="heap"})
+          /
+          sum by (job) (jvm_memory_max_bytes{job="cart-backend", area="heap"})
+          > 0.8  # More than 80% heap usage
+        for: 2m
+        labels:
+          severity: warning
+          namespace: shoppingcart
+          service: cart-backend
+        annotations:
+          summary: "High JVM memory usage in cart backend"
+          description: "JVM heap usage is at {{ $value }}%"
